@@ -44,7 +44,12 @@ void CameraController::captureAndPublish(const ros::TimerEvent &evt)
     uint64_t nsecs = fmod(_camera->getActualTimestamp(), 1e9);
     uint64_t secs = _camera->getActualTimestamp() / 1e9;
     ros::Time stamp(secs, nsecs);
-    stamp += ros::Duration(_ptp_time_offset_secs);
-
+    try {
+        stamp += ros::Duration(_ptp_time_offset_secs);
+    }
+    catch (const std::runtime_error& e) {
+        ROS_WARN("flir_adk_ethernet - WARN : Image Timestamp out of 32 bit range.");
+        return;
+    }
     publishImage(stamp);
 }
