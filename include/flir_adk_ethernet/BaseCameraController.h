@@ -70,7 +70,7 @@ class BaseCameraController : public nodelet::Nodelet
     virtual void setupCommandListeners();
     // publishes frame to topic
     void publishImage(ros::Time timestamp);
-    
+
 
     // command listeners
     void setPixelFormat(const std_msgs::StringConstPtr& msg);
@@ -79,7 +79,7 @@ class BaseCameraController : public nodelet::Nodelet
     void setNode(const diagnostic_msgs::KeyValueConstPtr& msg);
     void setROI(const sensor_msgs::RegionOfInterestConstPtr msg);
     void setCenterROI(const sensor_msgs::RegionOfInterestConstPtr msg);
-    
+
     bool getNode(GetNode::Request &req, GetNode::Response &res);
 
     ros::NodeHandle nh, pnh;
@@ -96,7 +96,7 @@ class BaseCameraController : public nodelet::Nodelet
     ros::Subscriber _setNodeListener;
     ros::Subscriber _setROIListener;
     ros::Subscriber _setCenterROIListener;
-    
+
     ros::ServiceServer _getNodeService;
 };
 

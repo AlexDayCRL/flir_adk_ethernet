@@ -35,7 +35,7 @@ void CameraController::setupFramePublish() {
 
 void CameraController::captureAndPublish(const ros::TimerEvent &evt)
 {
-    if (!_camera->isPTPEnabled())
+    if (!_camera->getPTPSlaveStatus())
     {
         publishImage(ros::Time::now());
         return;
@@ -45,5 +45,6 @@ void CameraController::captureAndPublish(const ros::TimerEvent &evt)
     uint64_t secs = _camera->getActualTimestamp() / 1e9;
     ros::Time stamp(secs, nsecs);
     stamp += ros::Duration(_ptp_time_offset_secs);
+
     publishImage(stamp);
 }

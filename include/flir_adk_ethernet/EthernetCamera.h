@@ -68,7 +68,7 @@ enum Polarity {
 class EthernetCamera
 {
   public:
-    EthernetCamera(EthernetCameraInfo info, 
+    EthernetCamera(EthernetCameraInfo info,
       std::shared_ptr<SystemWrapper> sys, ros::NodeHandle);
     ~EthernetCamera();
 
@@ -88,7 +88,7 @@ class EthernetCamera
 
     // gets the openCV image matrix
     cv::Mat getImageMatrix();
-    
+
     // gets the camera info formatted as a ROS sensor message
     sensor_msgs::CameraInfo getCameraInfo();
 
@@ -110,14 +110,14 @@ class EthernetCamera
 
     // gets encoding for image conversion
     std::string getEncoding();
-    
+
     // sets ROI of camera view
     bool setROI(int xOffset, int yOffset, int width, int height);
     bool setCenterROI(int width, int height);
- 
+
     bool isPTPEnabled();
-    bool printPTPStatus();
-  
+    bool getPTPSlaveStatus();
+
   private:
     PixelFormatEnums getPixelFormat(string formatStr);
 
@@ -170,8 +170,12 @@ class EthernetCamera
     std::string _camType;
     bool _isStreaming = false;
     bool _ptpEnabled = false;
+    bool _ptpSlaveMode = false;
+    CEnumerationPtr _ptpStatus;
+
+
 };
 
-}  // namespace flir_adk_ethernet
+}// namespace flir_adk_ethernet
 
 #endif

@@ -10,10 +10,10 @@
 using namespace cv;
 using namespace flir_adk_ethernet;
 
-EthernetCamera::EthernetCamera(EthernetCameraInfo info, 
+EthernetCamera::EthernetCamera(EthernetCameraInfo info,
         std::shared_ptr<SystemWrapper> sys,
         ros::NodeHandle nh) :
-    _ipAddr(info.ip), 
+    _ipAddr(info.ip),
     _cameraInfoPath(info.camInfoPath),
     _width(info.width),
     _height(info.height),
@@ -94,7 +94,7 @@ bool EthernetCamera::openCamera()
     setCameraInfo();
 
     return true;
-} 
+}
 
 bool EthernetCamera::findMatchingCamera(CameraListWrapper camList, const unsigned int numCams) {
     gcstring deviceIPAddress = "0.0.0.0";
@@ -129,7 +129,7 @@ bool EthernetCamera::ipMatches(string ip, INodeMap& nodeMapTLDevice) {
     if (IsAvailable(ptrIPAddress) && IsReadable(ptrIPAddress)) {
         return ip == GetDottedAddress(ptrIPAddress->GetValue());
     }
-    return false;    
+    return false;
 }
 
 bool EthernetCamera::camTypeMatches(string camType, INodeMap& nodeMapTLDevice) {
@@ -138,7 +138,7 @@ bool EthernetCamera::camTypeMatches(string camType, INodeMap& nodeMapTLDevice) {
         auto found = toLower(modelName->ToString().c_str()).find(_camType);
         return found != std::string::npos;
     }
-    
+
     return false;
 }
 
@@ -152,10 +152,10 @@ bool EthernetCamera::setPTP() {
         ptpEnable->SetValue(true);
         ptpMode->SetIntValue(Spinnaker::GevIEEE1588Mode_SlaveOnly);
         _ptpEnabled = true;
-        
+
         ROS_INFO("flir_adk_ethernet - INFO : PTP enabled flag: %d", ptpEnable->GetValue());
         ROS_INFO("flir_adk_ethernet - INFO : Set PTP to mode %ld", ptpMode->GetIntValue());
-        ROS_INFO("flir_adk_ethernet - INFO : PTP status flag: %ld", ptpStatus->GetIntValue());
+        ROS_INFO("flir_adk_ethernet - INFO : Current PTP status: %s", ptpStatus->ToString().c_str());
         return true;
     }
     catch(const Spinnaker::Exception & e) {
@@ -164,22 +164,15 @@ bool EthernetCamera::setPTP() {
     }
 }
 
-bool EthernetCamera::printPTPStatus() {
+bool EthernetCamera::getPTPSlaveStatus() {
     try {
-        INodeMap &nodeMap = _pCam->GetNodeMap();
-        CBooleanPtr ptpEnable = nodeMap.GetNode("GevIEEE1588");
-        CEnumerationPtr ptpMode = nodeMap.GetNode("GevIEEE1588Mode");
-        CEnumerationPtr ptpStatus = nodeMap.GetNode("GevIEEE1588Status");
-
-        ROS_INFO("flir_adk_ethernet - INFO : PTP enabled flag: %d", ptpEnable->GetValue());
-        ROS_INFO("flir_adk_ethernet - INFO : Set PTP to mode %ld", ptpMode->GetIntValue());
-        ROS_INFO("flir_adk_ethernet - INFO : PTP status flag: %ld", ptpStatus->GetIntValue());
-        return true;
-    }   
+        ROS_DEBUG("flir_adk_ethernet - DEBUG : PTP status flag: %s", _ptpStatus->ToString().c_str());
+        return (_ptpStatus->GetIntValue() == Spinnaker::GevIEEE1588Status_Slave);
+    }
     catch(const Spinnaker::Exception & e) {
         ROS_ERROR("flir_adk_ethernet - ERROR : %s", e.what());
         return false;
-    }  
+    }
 }
 
 bool EthernetCamera::setImageInfo() {
@@ -326,9 +319,10 @@ void EthernetCamera::setCameraEvents() {
 bool EthernetCamera::setImageAcquisition() {
     INodeMap &nodeMapTLDevice = _pCam->GetTLDeviceNodeMap();
     INodeMap &nodeMap = _pCam->GetNodeMap();
+    _ptpStatus = nodeMap.GetNode("GevIEEE1588Status");
 
     CEnumerationPtr ptrAcquisitionMode = nodeMap.GetNode("AcquisitionMode");
-    if (!IsAvailable(ptrAcquisitionMode) || !IsWritable(ptrAcquisitionMode)) 
+    if (!IsAvailable(ptrAcquisitionMode) || !IsWritable(ptrAcquisitionMode))
     {
         ROS_ERROR("flir_adk_ethernet - INFO : Unable to set acquisition mode. Aborting...");
         return false;
@@ -349,14 +343,14 @@ bool EthernetCamera::setImageAcquisition() {
     ptrAcquisitionMode->SetIntValue(acquisitionModeContinuous);
 
     ROS_INFO("flir_adk_ethernet - INFO : Acquisition mode set to continuous...");
-    
+
     startCapture();
 
     return true;
 }
 
 void EthernetCamera::initOpenCVBuffers() {
-    _thermalImageMat = Mat(_height, _width, _selectedFormat.getMatType(), 
+    _thermalImageMat = Mat(_height, _width, _selectedFormat.getMatType(),
         reinterpret_cast<void *>(_bufferStart));
 }
 
@@ -446,7 +440,7 @@ std::string EthernetCamera::setAutoFFC(bool autoFFC) {
     INodeMap &nodeMap = _pCam->GetNodeMap();
     CEnumerationPtr ffcNode = nodeMap.GetNode("BosonFfcMode");
     if (IsAvailable(ffcNode) && IsReadable(ffcNode)) {
-        gcstring nodeValName = autoFFC ? "Auto" : "Manual"; 
+        gcstring nodeValName = autoFFC ? "Auto" : "Manual";
         int64_t nodeVal = ffcNode->GetEntryByName(nodeValName)->GetValue();
         ffcNode->SetIntValue(nodeVal);
         return nodeValName.c_str();
@@ -516,7 +510,7 @@ bool EthernetCamera::setNodeValue(std::string nodeName, std::string value) {
     } catch(const Spinnaker::Exception & e) {
         ROS_ERROR("flir_adk_ethernet - ERROR : %s", e.what());
     }
-    
+
     startCapture();
     return result;
 }

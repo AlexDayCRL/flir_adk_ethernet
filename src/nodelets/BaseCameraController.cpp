@@ -27,7 +27,7 @@ void BaseCameraController::onInit()
 {
     nh = getNodeHandle();
     pnh = getPrivateNodeHandle();
-    
+
     it = std::shared_ptr<image_transport::ImageTransport>(new image_transport::ImageTransport(nh));
     _imagePublisher = it->advertiseCamera("image_raw", 1);
     setupExtraPubSub();
@@ -51,7 +51,7 @@ void BaseCameraController::onInit()
 
     ROS_INFO("flir_adk_ethernet - Got frame_id: %s.", frame_id.c_str());
     ROS_INFO("flir_adk_ethernet - Got IP: %s.", ip.c_str());
-    ROS_INFO("flir_adk_ethernet - Got camera_info_url: %s.", 
+    ROS_INFO("flir_adk_ethernet - Got camera_info_url: %s.",
         cameraInfoStr.c_str());
     ROS_INFO("flir_adk_ethernet - Got video_format: %s.", formatStr.c_str());
     ROS_INFO("flir_adk_ethernet - Got camera_type: %s.", camType.c_str());
@@ -84,7 +84,7 @@ void BaseCameraController::onInit()
         ros::shutdown();
         return;
     }
-    
+
     setupFramePublish();
 }
 
@@ -99,7 +99,7 @@ void BaseCameraController::setupCommandListeners() {
     _autoFFCListener = nh.subscribe<std_msgs::Bool>("auto_ffc", 10,
         boost::bind(&BaseCameraController::setAutoFFC, this, _1));
 
-    _ffcListener = nh.subscribe<std_msgs::Empty>("ffc", 10, 
+    _ffcListener = nh.subscribe<std_msgs::Empty>("ffc", 10,
         boost::bind(&BaseCameraController::executeFFC, this));
 
     _setNodeListener = nh.subscribe<diagnostic_msgs::KeyValue>("set_node", 10,
@@ -178,8 +178,6 @@ void BaseCameraController::setCenterROI(const sensor_msgs::RegionOfInterestConst
     _camera->setCenterROI(width, height);
     _camera->startCapture();
 }
-
-
 
 void BaseCameraController::publishImage(ros::Time timestamp) {
     sensor_msgs::CameraInfoPtr
