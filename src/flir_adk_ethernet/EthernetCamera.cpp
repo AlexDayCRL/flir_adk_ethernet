@@ -9,6 +9,7 @@
 
 using namespace cv;
 using namespace flir_adk_ethernet;
+using diagnostic_msgs::DiagnosticStatus;
 
 EthernetCamera::EthernetCamera(EthernetCameraInfo info,
         std::shared_ptr<SystemWrapper> sys,
@@ -26,6 +27,8 @@ EthernetCamera::EthernetCamera(EthernetCameraInfo info,
 {
     _cameraInfo = std::shared_ptr<camera_info_manager::CameraInfoManager>(
         new camera_info_manager::CameraInfoManager(nh));
+
+    setupDiagnostics(nh);
 }
 
 EthernetCamera::~EthernetCamera() {
@@ -572,4 +575,27 @@ void EthernetCamera::stopCapture() {
 
 std::string EthernetCamera::getEncoding() {
     return _selectedFormat.getImageEncoding();
+}
+
+void EthernetCamera::setupDiagnostics(ros::NodeHandle nh) {
+    _diagnosticsUpdater.setHardwareID("flir adk");
+    _diagnosticsUpdater.add("ptp_status", this, &EthernetCamera::createPtpStatusDiagnostics);
+    _diagnosticsTrigger = nh.createTimer(ros::Duration(2), &EthernetCamera::diagnosticsTimerCallback, this);
+
+}
+
+void EthernetCamera::createPtpStatusDiagnostics(diagnostic_updater::DiagnosticStatusWrapper& stat) {
+    const auto ptpStatusStr =  _ptpStatus->ToString();
+    if (ptpStatusStr == "Slave")
+    {
+        stat.summaryf(DiagnosticStatus::OK, "PTP status: Slave");
+    }
+    else
+    {
+        stat.summaryf(DiagnosticStatus::ERROR, "PTP status: " + ptpStatusStr);
+    }
+}
+
+void EthernetCamera::diagnosticsTimerCallback(const ros::TimerEvent&) {
+    _diagnosticsUpdater.update();
 }

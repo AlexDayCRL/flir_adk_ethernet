@@ -31,6 +31,9 @@
 #include <image_transport/image_transport.h>
 #include <camera_info_manager/camera_info_manager.h>
 
+#include <diagnostic_updater/diagnostic_updater.h>
+#include <diagnostic_updater/publisher.h>
+
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/Image.h>
 
@@ -153,6 +156,10 @@ class EthernetCamera
     bool setEnumNode(CNodePtr node, std::string value);
     bool setCommandNode(CNodePtr node);
 
+    void setupDiagnostics(ros::NodeHandle nh);
+    void createPtpStatusDiagnostics(diagnostic_updater::DiagnosticStatusWrapper& stat);
+    void diagnosticsTimerCallback(const ros::TimerEvent&);
+
     std::shared_ptr<camera_info_manager::CameraInfoManager> _cameraInfo;
     int32_t _width, _height, _xOffset, _yOffset, _imageSize;
     int32_t _frame = 0;                // First frame number enumeration
@@ -172,7 +179,8 @@ class EthernetCamera
     bool _ptpEnabled = false;
     bool _ptpSlaveMode = false;
     CEnumerationPtr _ptpStatus;
-
+    diagnostic_updater::Updater _diagnosticsUpdater;
+    ros::Timer _diagnosticsTrigger;
 
 };
 
