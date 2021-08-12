@@ -197,8 +197,8 @@ void BaseCameraController::publishImage(ros::Time timestamp) {
         _imagePublisher.publish(publishedImage, ci);
 
         _seq++;
-    } catch(exception e) {
+    } catch(const exception& e) {
         // just don't publish this frame
-        std::cout << "Publish exception" << std::endl;
+        ROS_ERROR_STREAM("Publish exception: " << e.what());
     }
 }
