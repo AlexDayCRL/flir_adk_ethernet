@@ -84,6 +84,7 @@ class EthernetCamera
                     const int& height,
                     const int& width);
     bool openCamera();
+    bool initCamera();
     bool closeCamera();
 
     void stopCapture();

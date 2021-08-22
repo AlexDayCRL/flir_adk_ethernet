@@ -42,28 +42,28 @@ EthernetCamera::~EthernetCamera() {
 void EthernetCamera::agcBasicLinear(const Mat &input_16,
                                     Mat *output_8,
                                     const int &height,
-                                    const int &width)
-{
+                                    const int &width) {
     // unimplemented for now
 }
 
-bool EthernetCamera::openCamera()
-{
+bool EthernetCamera::openCamera() {
     CameraListWrapper camList = _system->GetCameras();
     const unsigned int numCameras = camList.GetSize();
 
     if(numCameras == 0) {
-        ROS_ERROR("flir_adk_ethernet - ERROR : NO_CAMERAS. No cameras found");
-        camList.Clear();
-        _system->ReleaseInstance();
+        ROS_WARN("flir_adk_ethernet - WARN : NO_CAMERAS. No cameras found. Retrying...");
         return false;
     }
 
     if(!findMatchingCamera(camList, numCameras) || !_pCam->IsValid()) {
-        ROS_ERROR("flir_adk_ethernet - ERROR : OPEN. No device matches ip_addr: %s", _ipAddr.c_str());
+        ROS_WARN("flir_adk_ethernet - WARN : OPEN. No device matches ip_addr: %s", _ipAddr.c_str());
         return false;
     }
 
+    return true;
+}
+
+bool EthernetCamera::initCamera() {
     try {
         _pCam->Init();
     }
@@ -585,13 +585,13 @@ void EthernetCamera::setupDiagnostics(ros::NodeHandle nh) {
 }
 
 void EthernetCamera::createPtpStatusDiagnostics(diagnostic_updater::DiagnosticStatusWrapper& stat) {
-    const auto ptpStatusStr =  _ptpStatus->ToString();
-    if (ptpStatusStr == "Slave")
-    {
-        stat.summaryf(DiagnosticStatus::OK, "PTP status: Slave");
+    if (!_ptpStatus) {
+        return;
     }
-    else
-    {
+    const auto ptpStatusStr =  _ptpStatus->ToString();
+    if (ptpStatusStr == "Slave") {
+        stat.summaryf(DiagnosticStatus::OK, "PTP status: Slave");
+    } else {
         stat.summaryf(DiagnosticStatus::ERROR, "PTP status: " + ptpStatusStr);
     }
 }

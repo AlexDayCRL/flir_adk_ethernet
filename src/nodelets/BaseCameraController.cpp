@@ -34,8 +34,6 @@ void BaseCameraController::onInit()
 
     setupCommandListeners();
 
-    bool exit = false;
-
     std::string ip, cameraInfoStr, formatStr, camType;
     int width, height, xOffset, yOffset;
 
@@ -75,12 +73,15 @@ void BaseCameraController::onInit()
 
     _camera = new EthernetCamera(info, sys, nh);
 
-    if (!exit) {
-        exit = !_camera->openCamera() || exit;
+    bool exit = false;
+
+    ros::Rate r(2);
+    while (!exit || !_camera->openCamera()) {
+        exit = ros::ok();
+        r.sleep();
     }
 
-    if (exit)
-    {
+    if (exit || !_camera->initCamera()) {
         ros::shutdown();
         return;
     }

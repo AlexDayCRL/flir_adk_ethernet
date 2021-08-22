@@ -11,11 +11,9 @@
 #include <nodelet/loader.h>
 #include <ros/console.h>
 
-using namespace std;
-
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "Boson Camera Node");
+  ros::init(argc, argv, "flir_adk_ethernet_node");
   nodelet::Loader nodelet;
   nodelet::M_string remap(ros::names::getRemappings());
   nodelet::V_string nargv;
