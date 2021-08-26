@@ -14,6 +14,7 @@ CameraWrapper::CameraWrapper(Spinnaker::CameraPtr cam) : _cam(cam) {}
 CameraWrapper::CameraWrapper(const CameraWrapper& wrapper) {
     _cam = wrapper._cam;
 }
+
 CameraWrapper::~CameraWrapper() {
     _cam = nullptr;
 }
@@ -24,7 +25,7 @@ void CameraWrapper::Init() {
 
 
 bool CameraWrapper::IsInitialized() {
-    _cam->IsInitialized();
+    return _cam->IsInitialized();
 }
 
 bool CameraWrapper::IsValid() {
