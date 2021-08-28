@@ -81,11 +81,6 @@ void BaseCameraController::onInit()
         r.sleep();
     }
 
-    if (exit || !_camera->initCamera()) {
-        ros::shutdown();
-        return;
-    }
-
     setupFramePublish();
 }
 

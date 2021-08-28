@@ -60,7 +60,9 @@ bool EthernetCamera::openCamera() {
         return false;
     }
 
-    return true;
+    bool cameraStatus = initCamera();
+
+    return cameraStatus;
 }
 
 bool EthernetCamera::initCamera() {
@@ -370,7 +372,7 @@ void EthernetCamera::setCameraInfo() {
 }
 
 bool EthernetCamera::closeCamera() {
-    if(_pCam && _pCam->IsInitialized()) {
+    if(_pCam && _pCam->IsValid() && _pCam->IsInitialized()) {
         unsetCameraEvents();
         stopCapture();
         _pCam->DeInit();
