@@ -50,6 +50,7 @@ class CameraController : public BaseCameraController
 
     float _frame_rate;
     int _ptp_time_offset_secs;
+    int _max_ptp_offset_secs;
     bool zoom_enable;
     SensorTypes sensor_type;
     Encoding _videoMode;

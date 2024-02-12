@@ -26,8 +26,10 @@ CameraController::~CameraController()
 void CameraController::setupFramePublish() {
     pnh.param<float>("frame_rate", _frame_rate, 60.0);
     pnh.param<int>("ptp_time_offset_secs", _ptp_time_offset_secs, 0);
+    pnh.param<int>("max_ptp_offset_secs", _max_ptp_offset_secs, 60);
     ROS_INFO("hack flir_adk_ethernet - Got frame rate: %f.", _frame_rate);
     ROS_INFO("hack flir_adk_ethernet - Got ptp time offset: %i.", _ptp_time_offset_secs);
+    ROS_INFO("hack flir_adk_ethernet - Got max ptp offset: %i.", _max_ptp_offset_secs);
 
     capture_timer = nh.createTimer(ros::Duration(1.0 / _frame_rate),
         boost::bind(&CameraController::captureAndPublish, this, _1));
@@ -59,6 +61,10 @@ void CameraController::captureAndPublish(const ros::TimerEvent &evt)
     {
         ROS_WARN("flir_adk_ethernet ts %lu s %lu ns is not large-enough for ptp offset (%d), so not applying one."
             , sec, nsec, _ptp_time_offset_secs);
+    }
+    else if (std::abs(sec - stamp.toSec()) > _max_ptp_offset_secs)
+    {
+        ROS_WARN("flir_adk_ethernet ts %lu s %lu ns offset from s/w time > max offset (%d) - using s/w stamp");
     }
     else
     {
